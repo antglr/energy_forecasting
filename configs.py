@@ -1,3 +1,4 @@
+LOGS_DIR = 'tb_hparams'
 outlier_threshold = 7
 sfreq = 0.833
 nyquist_lim = sfreq / 2 + 1e-6
@@ -54,7 +55,11 @@ data_search_space = {
     'autoregressive': [True, False],
     'include_present': [True, False],
 }
-
+CV = {
+    'train_size': 10,
+    'test_size': 1,
+    'n_trials': 10,
+}
 models_search_space = { 
     'LinearRegression': {
         'search_space': { 
