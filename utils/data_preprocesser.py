@@ -27,7 +27,7 @@ class DataPreprocesser:
         self.include_present = include_present
         self.autoregressive = autoregressive
 
-        print(f"Windowing -- past history: {past_history}, forecast_horizon: {forecast_horizon}, autoregressive: {autoregressive}")
+        # print(f"Windowing -- past history: {past_history}, forecast_horizon: {forecast_horizon}, autoregressive: {autoregressive}")
         for k in data:
             d = data[k]
             if past_history == 0:
@@ -45,11 +45,15 @@ class DataPreprocesser:
                 for t in range(past_history, d.shape[0] - forecast_horizon, stride):
                     x.append(d[t - past_history: t, var_idx:])
                     y.append(d[t - include_present: t + forecast_horizon, 0])
-                data[k] = (np.stack(x), np.stack(y).reshape(-1, forecast_horizon), d[:, 0])
-            print(f'Dataset size {k} -- X: {data[k][0].shape}, y: {data[k][1].shape}')
+                data[k] = (np.stack(x), np.stack(y).reshape(-1, forecast_horizon + include_present), d[:, 0])
+            # print(f'Dataset size {k} -- X: {data[k][0].shape}, y: {data[k][1].shape}')
         return data
 
-    def fft_bandpass_filter(self, signal: np.ndarray, sampling_rate: float, lowcut: float, highcut: float):
+    def fft_bandpass_filter(self, 
+                            signal: np.ndarray, 
+                            sampling_rate: float, 
+                            lowcut: float, 
+                            highcut: float) -> np.ndarray:
         # NOTE VERIFIED
         # Compute the FFT
         fft_coeffs = np.fft.rfft(signal)
@@ -83,3 +87,7 @@ class DataPreprocesser:
             data[k] = (X, y)
         
         return data
+
+    def standardize_data(self, data_train: OrderedDict, data_test: OrderedDict) -> OrderedDict:
+        ...
+        return data_train, data_test
