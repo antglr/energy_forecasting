@@ -2,7 +2,7 @@ from collections import OrderedDict
 import numpy as np
 import configs
 
-class DataPreprocesser:
+class DataPreprocessor:
 
     def __init__(self):
         self.past_history = None
@@ -89,6 +89,27 @@ class DataPreprocesser:
         
         return data
 
-    def standardize_data(self, data_train: OrderedDict, data_test: OrderedDict) -> OrderedDict:
-        ...
-        return data_train, data_test
+    def scale(self, data_train: OrderedDict, data_test: OrderedDict) -> OrderedDict:
+        # NOTE VERIFIED
+        # Apply Z-score normalization
+        X = np.concatenate([data_train[k][0] for k in data_train.keys()])
+        y = np.concatenate([data_train[k][1] for k in data_train.keys()])
+
+        mean = np.mean(X, axis=(0, 1), keepdims=True)
+        std = np.std(X, axis=(0, 1), keepdims=True)
+        mean_y = np.mean(y)
+        std_y = np.std(y)
+
+        for k in data_train:
+            X, y = data_train[k]
+            X = (X - mean) / std
+            y = (y - mean_y) / std_y
+            data_train[k] = (X, y)
+        
+        for k in data_test:
+            X, y = data_test[k]
+            X = (X - mean) / std
+            y = (y - mean_y) / std_y
+            data_test[k] = (X, y)
+
+        return data_train, data_test, mean_y, std_y
