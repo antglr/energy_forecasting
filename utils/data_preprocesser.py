@@ -70,7 +70,7 @@ class DataPreprocesser:
     
     def decompose(self, data: OrderedDict, lowcut: float, highcut: float) -> OrderedDict:
         # NOTE VERIFIED
-        sfreq = configs.data_configs['sfreq']
+        sfreq = configs.sfreq
         for k in data:
             X, y, y_full = data[k]
             y_full_band = self.fft_bandpass_filter(y_full, sfreq, lowcut, highcut)
@@ -82,7 +82,8 @@ class DataPreprocesser:
                     y[i, j] = y_full_band[mask]
 
             if self.autoregressive:
-                X[:, 0] = self.fft_bandpass_filter(X[:, 0], sfreq, lowcut, highcut)
+                for i in range(X.shape[0]):
+                    X[i, :, 0] = self.fft_bandpass_filter(X[i, :, 0], sfreq, lowcut, highcut)
 
             data[k] = (X, y)
         
