@@ -1,4 +1,5 @@
 import os
+import configs
 import numpy as np
 import matplotlib.pyplot as plt
 from copy import deepcopy
@@ -9,18 +10,16 @@ from sklearn.impute import KNNImputer
 from scipy.io import loadmat
 from typing import List, Callable
 from scipy.fft import fft, ifft
-import logging
-logging.basicConfig(
-    level=logging.INFO, 
-    format=f"%(levelname)s - %(asctime)s - %(message)s")
 
-class DataManager:
+class DataLoader:
 
     def __init__(self, base_path: str = os.path.join('..', 'datasets')):
         self.base_path = base_path
 
-    def load(self, datatype: str, name: str, variables: List[str] = None, sorting_fn: Callable = None) -> OrderedDict:
-        logging.info(f'Loading dataset {name} -- dtype: {datatype}')
+    def load(self, datatype: str, name: str, sorting_fn: Callable = None) -> OrderedDict:
+        # NOTE VERIFIED
+        print(f'Loading dataset {name} -- dtype: {datatype}')
+        variables = configs.data_configs['variables']
         if sorting_fn is None:
             sorting_fn = lambda x: x
         path = os.path.join(self.base_path, datatype, name)
@@ -33,16 +32,17 @@ class DataManager:
             variables = mat_file.keys() if variables is None else variables
             dataset[dataset_name] = np.hstack([mat_file[v].reshape(-1, 1) for v in variables])
 
-        logging.info(f'Dataset loaded')
-        logging.info(f'n. splits: {len(dataset.keys())}')
+        print(f'Dataset loaded')
+        print(f'n. splits: {len(dataset.keys())}')
         return dataset
 
-    def _outlier_detection_std(self, data: np.ndarray, alpha: int):
+    def _outlier_detection_std(self, data: np.ndarray):
+        # NOTE VERIFIED
         for col in range(data.shape[1]):
             d = data[:, col]
             mean, std = np.nanmean(d), np.nanstd(d)
-            lower_bound = mean - alpha*std
-            upper_bound = mean + alpha*std
+            lower_bound = mean - configs.data_configs['outlier_threshold']*std
+            upper_bound = mean + configs.data_configs['outlier_threshold']*std
             
             # Identify outliers and mark them as NaN
             outlier_indices = np.where((data[:, col] < lower_bound) | (data[:, col] > upper_bound))[0]
@@ -50,12 +50,13 @@ class DataManager:
         
         return data
 
-    def clean(self, data: OrderedDict, alpha: int, n_neighbors: int = 2, log: bool = True) -> OrderedDict:
-        if log: logging.info('Data cleaning...')
+    def clean(self, data: OrderedDict, n_neighbors: int = 2) -> OrderedDict:
+        # NOTE VERIFIED
+        print('Data cleaning...')
         imputer = KNNImputer(n_neighbors=n_neighbors, weights="uniform")
         for k in data:
             # Outlier detection using IQR
-            data[k] = self._outlier_detection_std(data[k], alpha=alpha) # TODO: add plots and logging
+            data[k] = self._outlier_detection_std(data[k])
 
             # Data imputing
             if np.isnan(data[k]).any():
