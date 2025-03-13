@@ -1,6 +1,6 @@
 venv/
 utils/__pycache__/
-tb_hparams/
+tb_*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

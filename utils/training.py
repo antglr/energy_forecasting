@@ -36,6 +36,8 @@ class Trainer:
             )
         else:
             X = X.reshape(X.shape[0], -1)
+            if y.shape[1] == 1:
+                y = y.reshape(-1)
             model.fit(X, y)
         return model
 
@@ -94,14 +96,18 @@ class Trainer:
             result_train = Metrics.get_metric(y_pred=pred_train, y_true=y_train, metric=configs.metric)
             results[n_fold] = {'train': result_train, 'test': result_test}
             print(f'{configs.metric} for fold {n_fold}: {results[n_fold]}')
+            
+            for k, v in model_config.items():
+                if isinstance(v, list) or isinstance(v, tuple):
+                    model_config[k] = str(v)
             writer.add_hparams(
-            hparam_dict={'model': model.__class__.__name__, 
-                         'n_fold': n_fold,
-                         'train_size': train_size,
-                         'test_size': test_size,
-                         **configs.data_hparams_logging,
-                         **model_config}, 
-            metric_dict={f'test_{configs.metric}': result_test, f'train_{configs.metric}': result_train})
+                hparam_dict={'model': model.__class__.__name__, 
+                            'n_fold': n_fold,
+                            'train_size': train_size,
+                            'test_size': test_size,
+                            **configs.data_hparams_logging,
+                            **model_config}, 
+                metric_dict={f'test_{configs.metric}': result_test, f'train_{configs.metric}': result_train})
             writer.close()
         
         mean_train_metric = np.mean([results[fold]['train'] for fold in results])

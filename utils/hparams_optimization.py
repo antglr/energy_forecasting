@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import configs
 import optuna
 import importlib
@@ -24,7 +25,8 @@ class HyperparameterOptimizer:
         if not isinstance(search_space, dict) and not isinstance(search_space, list): # case with fixed params
             return search_space
         elif isinstance(search_space, list): # categorical vars
-            return trial.suggest_categorical(name=hparam_name, choices=search_space)
+            idx = trial.suggest_categorical(name=hparam_name, choices=[i for i in range(len(search_space))])
+            return search_space[idx]
         else: # numerical vars
             min_val, max_val = search_space['min'], search_space['max']
             if isinstance(min_val, float):
