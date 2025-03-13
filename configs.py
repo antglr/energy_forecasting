@@ -156,8 +156,6 @@ models_search_space = {
     'MLPRegressor': {
         'search_space': {
             'hidden_layer_sizes': [
-                (2,),
-                (4,),
                 (8,),
                 (16,),
                 (32,),
@@ -165,7 +163,6 @@ models_search_space = {
                 (128,),
                 (256,),
                 (512,),
-                (4, 2),
                 (8, 4),
                 (16, 8),
                 (32, 16),
