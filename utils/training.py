@@ -20,6 +20,7 @@ class Trainer:
         self.preprocessor = preprocessor
 
     def fit(self, train_data: Tuple[np.ndarray, np.ndarray], model, writer: SummaryWriter):
+        # NOTE VERIFIED
         X, y = train_data
         if isinstance(model, torch.nn.Module):
             if model.__class__.__name__ == 'CNN':
@@ -28,7 +29,6 @@ class Trainer:
                 net=model,
                 train_data=(X, y),
                 optimizer=torch.optim.Adam(model.parameters(), lr=model.lr, weight_decay=model.weight_decay),
-                device='cuda:3',
                 batch_size=model.batch_size,
                 max_epochs=10000,
                 early_stopping_patience=50,
@@ -146,7 +146,7 @@ class Trainer:
         if isinstance(model, torch.nn.Module):
             if model.__class__.__name__ == 'CNN':
                 X = np.transpose(X, (0, 2, 1))
-            pred = predict_data(net=model, test_data=(X, y), device='cuda:3')
+            pred = predict_data(net=model, test_data=(X, y))
             
         else:
             X = X.reshape(X.shape[0], -1)

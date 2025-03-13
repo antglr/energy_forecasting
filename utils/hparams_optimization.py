@@ -42,6 +42,10 @@ class HyperparameterOptimizer:
             model_config[hparam_name] = self.__get_config(trial, hparam_name, search_space[hparam_name])
 
         model_class = self.__get_model_class(class_name=self.model_name, package=self.model_hparams['package'])
+        if 'pytorch' in self.model_hparams['package']:
+            model_config['forecast_horizon'] = configs.data_hparams_logging['forecast_horizon'] + \
+                                            int(configs.data_hparams_logging['include_present'])
+            model_config['input_size'] = configs.data_hparams_logging['input_size']
         model = model_class(**model_config)
         
         _, mean_test_result = self.trainer.time_cross_validation(model=model, data=self.data, model_config=model_config)
@@ -65,6 +69,6 @@ class HyperparameterOptimizer:
                        n_trials=n_trials,
                        n_jobs=1)
         
-        df = study.trials_dataframe()
         # NOTE: you can save this df
+        # df = study.trials_dataframe()
 

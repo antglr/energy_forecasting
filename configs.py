@@ -1,3 +1,4 @@
+PYTORCH_DEVICE = 'cuda:3'
 LOGS_DIR_DETAIL = 'tb_hparams_detail'
 LOGS_DIR_AVG = 'tb_hparams_avg'
 outlier_threshold = 7
@@ -51,14 +52,14 @@ variables = [
 
 metric = 'std_residual'
 data_search_space = {
-    'past_history': [10, 20, 60, 120, 180],
-    'forecast_horizon': [1, 2, 5, 10],
-    'autoregressive': [True, False],
-    'include_present': [True, False],
-    # 'past_history': [10, 20],
-    # 'forecast_horizon': [1],
-    # 'autoregressive': [True],
-    # 'include_present': [False],
+    # 'past_history': [10, 20, 60, 120, 180],
+    # 'forecast_horizon': [1, 2, 5, 10],
+    # 'autoregressive': [True, False],
+    # 'include_present': [True, False],
+    'past_history': [10, 20],
+    'forecast_horizon': [1],
+    'autoregressive': [True],
+    'include_present': [False],
 }
 CV = {
     'train_size': 10,
@@ -178,17 +179,14 @@ models_search_space = {
                 (256, 128, 64),
                 (512, 256, 128),
             ],
-            'activation': ['tanh', 'relu', 'logistic'],
+            'activation': ['tanh', 'relu'],
             'solver': ['adam'],
             'alpha': {
                 'min': 0.0,
                 'max': 0.01,
             },
-            'batch_size': [8, 16, 32, 64, 128],
-            'learning_rate_init': { 
-                'min': 0.00000001,
-                'max': 0.001,
-            },
+            'batch_size': [8, 16, 32, 64],
+            'learning_rate_init': [0.0001, 0.001],
             'max_iter': 3000,
             'early_stopping' : True,
             'tol': 10,
@@ -202,16 +200,12 @@ models_search_space = {
         
     'RNN': {
         'search_space': {
-            'input_size': 18,
             'hidden_size': [4, 8, 16, 32, 64],
             'n_layers': {
                 'min': 1,
-                'max': 6,
+                'max': 3,
             },
-            'lr': {
-                'min': 0.000001,
-                'max': 0.001,
-            },
+            'lr': [0.0001, 0.001],
             'batch_size': [8, 16, 32, 64],
             'weight_decay': {
                 'min': 0.0,
@@ -225,16 +219,12 @@ models_search_space = {
 
     'GRU': {
         'search_space': {
-            'input_size': 18,
             'hidden_size': [4, 8, 16, 32, 64],
             'n_layers': {
                 'min': 1,
-                'max': 5,
+                'max': 3,
             },
-            'lr': {
-                'min': 0.000001,
-                'max': 0.001,
-            },
+            'lr': [0.0001, 0.001],
             'batch_size': [8, 16, 32, 64],
             'weight_decay': { 
                 'min': 0.0,
@@ -248,16 +238,12 @@ models_search_space = {
     
     'LSTM': {
         'search_space': {
-            'input_size': 18,
             'hidden_size': [4, 8, 16, 32, 64],
             'n_layers': {
                 'min': 1,
-                'max': 5,
+                'max': 3,
             },
-            'lr': { 
-                'min': 0.000001,
-                'max': 0.001,
-            },
+            'lr': [0.0001, 0.001],
             'batch_size': [8, 16, 32, 64],
             'weight_decay': { 
                 'min': 0.0,
@@ -271,18 +257,14 @@ models_search_space = {
 
     'CNN': {
         'search_space': {
-            'in_channels': 18,
-            'n_filters': [2, 4, 8, 16, 32],
+            'n_filters': [4, 8, 16, 32],
             'n_layers': { 
                 'min': 1,
-                'max': 5,
+                'max': 3,
             },
             'kernel_size': [3, 5],
             'act_fn': ['relu', 'leaky_relu', 'tanh'],
-            'lr': {
-                'min': 0.000001,
-                'max': 0.001,
-            },
+            'lr': [0.0001, 0.001],
             'batch_size': [8, 16, 32, 64],
             'weight_decay': {
                 'min': 0.0,

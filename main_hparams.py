@@ -3,7 +3,6 @@ import math
 from copy import deepcopy
 from utils.data_loading import DataLoader
 from utils.plotting import Plotter
-from utils.artifact_manager import ArtifactManager
 from utils.hparams_optimization import HyperparameterOptimizer
 from utils.training import Trainer
 from utils.data_preprocessor import DataPreprocessor
@@ -42,9 +41,14 @@ for data_hparams in ParameterGrid(configs.data_search_space):
             print(f'{n_bands=}; lowcut:{lowcut:.4f} - highcut:{highcut:.4f}')
 
             for model_name in configs.models_search_space.keys():
-                if model_name not in ['MLPRegressor']:
+                if model_name not in ['RNN']:
                     continue
-                configs.data_hparams_logging = {'lowcut': lowcut, 'highcut': highcut, 'n_bands': n_bands, **data_hparams} # for tensorboard logging
+
+                configs.data_hparams_logging = {
+                    'lowcut': lowcut, 'highcut': highcut, 'n_bands': n_bands,
+                    'input_size': len(configs.variables) - int(not data_hparams['autoregressive']),
+                    **data_hparams} # for tensorboard logging and pytorch models
+                
                 hparams_optimizer.optimize(
                     data=deepcopy(data_decomposed),
                     model_name=model_name,

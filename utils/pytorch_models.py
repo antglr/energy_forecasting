@@ -1,5 +1,7 @@
+import configs
 import torch
 import torch.nn as nn
+from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader, TensorDataset
 from typing import Tuple
 from copy import deepcopy
@@ -81,7 +83,7 @@ class LSTM(nn.Module):
 
 class CNN(nn.Module):
     def __init__(self, 
-                 in_channels: int, 
+                 input_size: int, 
                  n_filters: int, 
                  n_layers: int, 
                  kernel_size: int,
@@ -96,9 +98,9 @@ class CNN(nn.Module):
         self.batch_size = batch_size
         net = list()
         for l in range(n_layers):
-            net.append(nn.Conv1d(in_channels=in_channels, out_channels=n_filters, kernel_size=kernel_size, padding='same'))
+            net.append(nn.Conv1d(in_channels=input_size, out_channels=n_filters, kernel_size=kernel_size, padding='same'))
             net.append(get_act_fn(act_fn)())
-            in_channels = n_filters
+            input_size = n_filters
             n_filters = n_filters * 2
         net.append(nn.Flatten(1))
         net.append(nn.LazyLinear(forecast_horizon))
@@ -112,9 +114,10 @@ class CNN(nn.Module):
 
 @torch.inference_mode()
 def predict_data(net: nn.Module,
-                 test_data: Tuple,
-                 device: str):
+                 test_data: Tuple):
+    # NOTE VERIFIED
     X, y = test_data
+    device=configs.PYTORCH_DEVICE
 
     # conversion to torch
     to_torch = lambda x: torch.from_numpy(x).float()
@@ -137,7 +140,9 @@ def predict_data(net: nn.Module,
     return torch.concat(pred).cpu().numpy()
 
 @torch.inference_mode()
-def _evaluate_dataloader(net, dataloader, device):
+def _evaluate_dataloader(net, dataloader):
+    # NOTE VERIFIED
+    device=configs.PYTORCH_DEVICE
     tot_loss = .0
     net.eval()
     for batch in dataloader:
@@ -152,10 +157,12 @@ def _evaluate_dataloader(net, dataloader, device):
 def fit(net: nn.Module, 
         train_data: Tuple, 
         optimizer: torch.optim.Optimizer,
-        device: str,
         batch_size: int,
         max_epochs: int,
-        early_stopping_patience: int):
+        early_stopping_patience: int,
+        writer: SummaryWriter):
+    # NOTE VERIFIED
+    device=configs.PYTORCH_DEVICE
 
     n_min_val = 2
     X_train, y_train = train_data
@@ -181,7 +188,7 @@ def fit(net: nn.Module,
                 optimizer=optimizer,
                 max_epochs=max_epochs,
                 early_stopping_patience=early_stopping_patience,
-                device=device)
+                writer=writer)
 
 def _fit(net: nn.Module,
          train_dataloader: DataLoader,
@@ -189,7 +196,9 @@ def _fit(net: nn.Module,
          optimizer: torch.optim.Optimizer,
          max_epochs: int,
          early_stopping_patience: int,
-         device: str):
+         writer: SummaryWriter):
+    # NOTE VERIFIED
+    device=configs.PYTORCH_DEVICE
     
     best_loss = float('+inf')
     early_stopping = 0
@@ -213,7 +222,7 @@ def _fit(net: nn.Module,
         train_loss /= len(train_dataloader)
 
         # Evaluation
-        val_loss = _evaluate_dataloader(net, val_dataloader, device)
+        val_loss = _evaluate_dataloader(net, val_dataloader)
 
         if val_loss < best_loss:
             best_loss = val_loss
@@ -226,6 +235,8 @@ def _fit(net: nn.Module,
             break
 
         print(f'{epoch=} - {train_loss=:.5f}, {val_loss=:.5f}')
+        writer.add_scalar('train/loss', train_loss, global_step=epoch)
+        writer.add_scalar('valid/loss', val_loss, global_step=epoch)
 
     net = best_net
     net.eval().cpu()
