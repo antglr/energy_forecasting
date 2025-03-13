@@ -14,9 +14,7 @@ logging.basicConfig(
     format=f"%(levelname)s - %(asctime)s - %(message)s")
 
 class Plotter:
-
-    def __init__(self, artifact_manager: ArtifactManager):
-        self.artifact_manager = artifact_manager
+    # NOTE NOT VERIFIED -- DEPCRECATED
 
     def correlation_heatmap(self, data: np.ndarray, variables: List[str], name: str, th_min: float, th_max: float):
         corr_matrix = np.zeros((data.shape[1], data.shape[1]))

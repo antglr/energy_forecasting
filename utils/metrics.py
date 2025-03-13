@@ -7,6 +7,7 @@ from typing import Union
 
 
 class Metrics:
+    # NOTE VERIFIED
 
     @staticmethod
     def mean_squared_error(y_pred: np.ndarray, y_true: np.ndarray) -> float:
@@ -25,11 +26,11 @@ class Metrics:
     
     @staticmethod
     def max_absolute_percentage_error(y_pred: np.ndarray, y_true: np.ndarray) -> float:
-        return np.max(Metrics.percentage_error(y_pred=y_pred, y_true=y_true))
+        return np.max(Metrics.absolute_percentage_error(y_pred=y_pred, y_true=y_true))
     
     @staticmethod
     def mean_absolute_percentage_error(y_pred: np.ndarray, y_true: np.ndarray) -> float:
-        return np.mean(Metrics.percentage_error(y_pred=y_pred, y_true=y_true))
+        return np.mean(Metrics.absolute_percentage_error(y_pred=y_pred, y_true=y_true))
 
     @staticmethod
     def residual(y_pred: np.ndarray, y_true: np.ndarray) -> np.ndarray:

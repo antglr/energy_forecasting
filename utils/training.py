@@ -40,6 +40,7 @@ class Trainer:
         return model
 
     def time_cross_validation(self, model, data: OrderedDict, model_config):
+        # NOTE VERIFIED
         train_size = configs.CV['train_size']
         test_size = configs.CV['test_size']
 
@@ -49,9 +50,11 @@ class Trainer:
         
         results = {}
         for n_fold, i in enumerate(range(fold_size, len(fold_splits) + 1)):
+            if n_fold >= configs.CV['n_fold_limit']:
+                continue
             writer = SummaryWriter(
                 log_dir=os.path.join(
-                    configs.LOGS_DIR, 
+                    configs.LOGS_DIR_DETAIL, 
                     f'{model.__class__.__name__}', 
                     f'autoregressive_{configs.data_hparams_logging["autoregressive"]}',
                     f'include_present_{configs.data_hparams_logging["include_present"]}',
@@ -91,20 +94,43 @@ class Trainer:
             result_train = Metrics.get_metric(y_pred=pred_train, y_true=y_train, metric=configs.metric)
             results[n_fold] = {'train': result_train, 'test': result_test}
             print(f'{configs.metric} for fold {n_fold}: {results[n_fold]}')
-
             writer.add_hparams(
-                hparam_dict={'model': model.__class__.__name__, 
-                             'n_fold': n_fold,
-                             'train_size': train_size,
-                             'test_size': test_size,
-                             **configs.data_hparams_logging,
-                             **model_config}, 
-                metric_dict={f'test_{configs.metric}': result_test, f'train_{configs.metric}': result_train})
+            hparam_dict={'model': model.__class__.__name__, 
+                         'n_fold': n_fold,
+                         'train_size': train_size,
+                         'test_size': test_size,
+                         **configs.data_hparams_logging,
+                         **model_config}, 
+            metric_dict={f'test_{configs.metric}': result_test, f'train_{configs.metric}': result_train})
             writer.close()
         
         mean_train_metric = np.mean([results[fold]['train'] for fold in results])
         mean_test_metric  = np.mean([results[fold]['test'] for fold in results])
+        std_train_metric = np.std([results[fold]['train'] for fold in results])
+        std_test_metric  = np.std([results[fold]['test'] for fold in results])
         print(f'CV result -- train: {mean_train_metric:.3f}, test: {mean_test_metric:.3f}')
+
+        writer = SummaryWriter(
+            log_dir=os.path.join(
+                configs.LOGS_DIR_AVG, 
+                f'{model.__class__.__name__}', 
+                f'autoregressive_{configs.data_hparams_logging["autoregressive"]}',
+                f'include_present_{configs.data_hparams_logging["include_present"]}',
+                f'PH_{configs.data_hparams_logging["past_history"]}__FH_{configs.data_hparams_logging["forecast_horizon"]}',
+                f'n_bands_{configs.data_hparams_logging["n_bands"]}'))
+        writer.add_hparams(
+            hparam_dict={'model': model.__class__.__name__, 
+                         'n_fold': n_fold,
+                         'train_size': train_size,
+                         'test_size': test_size,
+                         **configs.data_hparams_logging,
+                         **model_config}, 
+            metric_dict={f'mean_test_{configs.metric}': mean_test_metric, 
+                         f'std_test_{configs.metric}': std_test_metric, 
+                         f'mean_train_{configs.metric}': mean_train_metric,
+                         f'std_train_{configs.metric}': std_train_metric})
+        writer.close()
+
         return mean_train_metric, mean_test_metric
 
     @torch.inference_mode()

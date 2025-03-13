@@ -6,13 +6,13 @@ import pandas as pd
 from pickle import dump
 from matplotlib.figure import Figure
 from datetime import datetime
-from utils.miscellaneous import log_separator
 import logging
 logging.basicConfig(
     level=logging.INFO, 
     format=f"%(levelname)s - %(asctime)s - %(message)s")
 
 class ArtifactManager:
+    # NOTE NOT VERIFIED -- DEPCRECATED
     def __init__(self, exp_name: str):
         self.exp_name = f'{exp_name}__{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}'
         self.plot_path = os.path.join('artifacts', self.exp_name, 'plots')

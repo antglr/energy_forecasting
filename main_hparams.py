@@ -6,13 +6,14 @@ from utils.plotting import Plotter
 from utils.artifact_manager import ArtifactManager
 from utils.hparams_optimization import HyperparameterOptimizer
 from utils.training import Trainer
-from utils.data_preprocesser import DataPreprocesser
+from utils.data_preprocessor import DataPreprocessor
 from sklearn.model_selection import ParameterGrid
 
 data_manager = DataLoader()
+preprocessor = DataPreprocessor()
 plotter = Plotter()
-trainer = Trainer(data_manager=data_manager, plotter=plotter)
-preprocesser = DataPreprocesser()
+trainer = Trainer(data_manager=data_manager, plotter=plotter, preprocessor=preprocessor)
+hparams_optimizer = HyperparameterOptimizer(trainer=trainer)
 
 get_time = lambda x: x[-10:-4]
 data = data_manager.load(
@@ -22,27 +23,34 @@ data = data_manager.load(
 data = data_manager.clean(data=data)
 
 for data_hparams in ParameterGrid(configs.data_search_space):
-    try:
-        data_windowed = preprocesser.window(data=deepcopy(data),
-                                            past_history=data_hparams['past_history'],
-                                            forecast_horizon=data_hparams['forecast_horizon'],
-                                            include_present=data_hparams['include_present'],
-                                            autoregressive=data_hparams['autoregressive'])
-    except: # case autoregressive and include_present
+    if data_hparams['autoregressive'] == data_hparams['include_present'] == True:
         continue
+    data_windowed = preprocessor.window(data=deepcopy(data),
+                                        past_history=data_hparams['past_history'],
+                                        forecast_horizon=data_hparams['forecast_horizon'],
+                                        include_present=data_hparams['include_present'],
+                                        autoregressive=data_hparams['autoregressive'])
 
     freq_res = configs.sfreq / data_hparams['past_history']
-    n_bands = math.ceil(configs.nyquist_lim / freq_res)
-    bandwidth = configs.nyquist_lim / n_bands
-    for i in range(n_bands):
-        lf = i * bandwidth
-        hf = lf + bandwidth
-        data_decomposed = preprocesser.decompose(data=data_windowed, lowcut=lf, highcut=hf)
-        print(f'lf:{lf:.4f} - hf:{hf:.4f}')
+    max_bands = math.ceil(configs.nyquist_lim / freq_res)
+    for n_bands in range(1, max_bands + 1):
+        bandwidth = configs.nyquist_lim / n_bands
+        for i in range(n_bands):
+            lowcut = i * bandwidth
+            highcut = lowcut + bandwidth
+            data_decomposed = preprocessor.decompose(data=deepcopy(data_windowed), lowcut=lowcut, highcut=highcut)
+            print(f'{n_bands=}; lowcut:{lowcut:.4f} - highcut:{highcut:.4f}')
 
-        for model in 
-
-
+            for model_name in configs.models_search_space.keys():
+                if model_name not in ['LinearRegression']:
+                    continue
+                configs.data_hparams_logging = {'lowcut': lowcut, 'highcut': highcut, 'n_bands': n_bands, **data_hparams} # for tensorboard logging
+                # NOTE MLP CRASHES
+                hparams_optimizer.optimize(
+                    data=deepcopy(data_decomposed),
+                    model_name=model_name,
+                    model_hparams=configs.models_search_space[model_name]
+                )
 
 
 

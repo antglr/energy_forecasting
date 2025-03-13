@@ -1,4 +1,5 @@
-LOGS_DIR = 'tb_hparams'
+LOGS_DIR_DETAIL = 'tb_hparams_detail'
+LOGS_DIR_AVG = 'tb_hparams_avg'
 outlier_threshold = 7
 sfreq = 0.833
 nyquist_lim = sfreq / 2 + 1e-6
@@ -54,11 +55,16 @@ data_search_space = {
     'forecast_horizon': [1, 2, 5, 10],
     'autoregressive': [True, False],
     'include_present': [True, False],
+    # 'past_history': [10, 20],
+    # 'forecast_horizon': [1],
+    # 'autoregressive': [True],
+    # 'include_present': [False],
 }
 CV = {
     'train_size': 10,
     'test_size': 1,
     'n_trials': 10,
+    'n_fold_limit': 5, # float('+inf')
 }
 models_search_space = { 
     'LinearRegression': {

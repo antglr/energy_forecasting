@@ -12,6 +12,7 @@ class HyperparameterOptimizer:
         self.trainer = trainer
 
     def __get_model_class(self, class_name: str, package: str):
+        # NOTE VERIFIED
         # Import the module based on the package name
         module = importlib.import_module(package)
         # Retrieve the class from the module using its name
@@ -19,6 +20,7 @@ class HyperparameterOptimizer:
         return model_class
 
     def __get_config(self, trial: optuna.trial.Trial, hparam_name: str, search_space: Union[list, dict, int, float]):
+        # NOTE VERIFIED
         if not isinstance(search_space, dict) and not isinstance(search_space, list): # case with fixed params
             return search_space
         elif isinstance(search_space, list): # categorical vars

@@ -2,10 +2,9 @@ import os
 import configs
 import numpy as np
 from collections import OrderedDict
-from sklearn.base import TransformerMixin
 from sklearn.impute import KNNImputer
 from scipy.io import loadmat
-from typing import List, Callable
+from typing import Callable
 
 class DataLoader:
 
@@ -55,18 +54,5 @@ class DataLoader:
             # Data imputing
             if np.isnan(data[k]).any():
                 data[k] = imputer.fit_transform(data[k])
-        
-        return data
-
-    def fit_scaler(self, data: OrderedDict, names: List[str], scaler: TransformerMixin, log: bool = True) -> TransformerMixin:
-        d = np.concatenate([data[n] for n in names])
-        scaler.fit(d)
-
-        return scaler
-    
-    def scale(self, data: OrderedDict, scaler: TransformerMixin, names: List[str] = None, log: bool = True) -> OrderedDict:
-        variables = names if names is not None else data.keys()
-        for k in variables:
-            data[k] = scaler.transform(data[k])
         
         return data
