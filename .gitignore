@@ -1,6 +1,7 @@
 venv/
 utils/__pycache__/
 tb_*/
+nohup.out
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

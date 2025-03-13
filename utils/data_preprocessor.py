@@ -27,26 +27,21 @@ class DataPreprocessor:
         self.include_present = include_present
         self.autoregressive = autoregressive
 
-        # print(f"Windowing -- past history: {past_history}, forecast_horizon: {forecast_horizon}, autoregressive: {autoregressive}")
         for k in data:
             d = data[k]
-            if past_history == 0:
-                x = d[:, 1:]
-                y = d[:, 0]
-                data[k] = (x, y)
-            else:
-                x, y = list(), list()
-                var_idx = 1
-                if autoregressive:
-                    var_idx = 0
-                    include_present = False
-                include_present = 1 if include_present else 0
-                
-                for t in range(past_history, d.shape[0] - forecast_horizon, stride):
-                    x.append(d[t - past_history: t, var_idx:])
-                    y.append(d[t - include_present: t + forecast_horizon, 0])
-                data[k] = (np.stack(x), np.stack(y).reshape(-1, forecast_horizon + include_present), d[:, 0])
-            # print(f'Dataset size {k} -- X: {data[k][0].shape}, y: {data[k][1].shape}')
+            x, y = list(), list()
+            var_idx = 1
+            if autoregressive:
+                var_idx = 0
+            include_present = 1 if include_present else 0
+            
+            for t in range(1 + past_history, d.shape[0] - forecast_horizon, stride): # present (1) + past_history
+                x.append(d[t - past_history - 1: t, var_idx:])
+                y.append(d[t - include_present: t + forecast_horizon, 0])
+            x = np.stack(x)
+            y = np.stack(y).reshape(-1, forecast_horizon + include_present)
+            y_full = d[:, 0]
+            data[k] = (x, y, y_full)
         return data
 
     def fft_bandpass_filter(self, 

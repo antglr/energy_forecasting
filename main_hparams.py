@@ -21,8 +21,28 @@ data = data_manager.load(
     sorting_fn=get_time)
 data = data_manager.clean(data=data)
 
+def experimental_coverage(data_hparams):
+    # NOTE VERIFIED
+    conditions = [
+        (True, False, True, True),
+        (False, False, True, True),
+        (False, True, False, False),
+        (False, True, True, False),
+        (True, False, False, True),
+        (False, False, False, True),
+    ]
+    
+    params = (
+        data_hparams['autoregressive'],
+        data_hparams['include_present'],
+        data_hparams['past_history'] > 0,
+        data_hparams['forecast_horizon'] > 0
+    )
+    
+    return params in conditions
+
 for data_hparams in ParameterGrid(configs.data_search_space):
-    if data_hparams['autoregressive'] == data_hparams['include_present'] == True:
+    if not experimental_coverage(data_hparams):
         continue
     data_windowed = preprocessor.window(data=deepcopy(data),
                                         past_history=data_hparams['past_history'],
@@ -41,7 +61,9 @@ for data_hparams in ParameterGrid(configs.data_search_space):
             print(f'{n_bands=}; lowcut:{lowcut:.4f} - highcut:{highcut:.4f}')
 
             for model_name in configs.models_search_space.keys():
-                if model_name not in ['RNN']:
+                if data_hparams['past_history'] == 0 and model_name in ['RNN', 'LSTM', 'GRU']:
+                    continue
+                if model_name not in ['LinearRegression', 'MLPRegressor']:
                     continue
 
                 configs.data_hparams_logging = {
