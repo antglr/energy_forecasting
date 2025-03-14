@@ -61,7 +61,7 @@ for data_hparams in ParameterGrid(configs.data_search_space):
             print(f'{n_bands=}; lowcut:{lowcut:.4f} - highcut:{highcut:.4f}')
 
             for model_name in configs.models_search_space.keys():
-                if data_hparams['past_history'] == 0 and model_name in ['RNN', 'LSTM', 'GRU']:
+                if data_hparams['past_history'] == 0 and model_name in ['RNN', 'LSTM', 'GRU', 'CNN']:
                     continue
                 if model_name not in ['LinearRegression', 'MLPRegressor']:
                     continue
