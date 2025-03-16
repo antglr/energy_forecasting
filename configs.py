@@ -52,15 +52,15 @@ variables = [
 
 metric = 'std_residual'
 data_search_space = {
-    'past_history': [0, 10, 30, 60],
-    'forecast_horizon': [0, 1, 2, 5],
+    'past_history': [0, 60],
+    'forecast_horizon': [0, 1, 3],
     'autoregressive': [True, False],
     'include_present': [True, False],
 }
 CV = {
-    'train_size': 10,
+    'train_size': 1,
     'test_size': 1,
-    'n_trials': 20,
+    'n_trials': 10,
     'n_fold_limit': 5, # float('+inf')
 }
 models_search_space = { 
@@ -181,7 +181,7 @@ models_search_space = {
                 'min': 0.0,
                 'max': 0.01,
             },
-            'batch_size': [8, 16, 32, 64],
+            'batch_size': 32,
             'learning_rate_init': [0.0001, 0.001],
             'max_iter': 3000,
             'early_stopping' : True,

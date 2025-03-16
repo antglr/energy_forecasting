@@ -76,7 +76,7 @@ class DataPreprocessor:
                     mask = (y_full == y[i, j])
                     y[i, j] = y_full_band[mask]
 
-            if self.autoregressive:
+            if self.autoregressive and X.shape[1] > 1:
                 for i in range(X.shape[0]):
                     X[i, :, 0] = self.fft_bandpass_filter(X[i, :, 0], sfreq, lowcut, highcut)
 

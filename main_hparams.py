@@ -50,7 +50,10 @@ for data_hparams in ParameterGrid(configs.data_search_space):
                                         include_present=data_hparams['include_present'],
                                         autoregressive=data_hparams['autoregressive'])
 
-    freq_res = configs.sfreq / data_hparams['past_history']
+    data_resolution = data_hparams['past_history']
+    if data_resolution == 0:
+        data_resolution = 60
+    freq_res = configs.sfreq / data_resolution
     max_bands = math.ceil(configs.nyquist_lim / freq_res)
     for n_bands in range(1, max_bands + 1):
         bandwidth = configs.nyquist_lim / n_bands

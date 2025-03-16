@@ -41,7 +41,7 @@ class Trainer:
             model.fit(X, y)
         return model
 
-    def time_cross_validation(self, model, data: OrderedDict, model_config):
+    def time_cross_validation(self, model, data: OrderedDict, model_config, n_trial):
         # NOTE VERIFIED
         train_size = configs.CV['train_size']
         test_size = configs.CV['test_size']
@@ -63,7 +63,8 @@ class Trainer:
                     f'PH_{configs.data_hparams_logging["past_history"]}__FH_{configs.data_hparams_logging["forecast_horizon"]}',
                     f'n_bands_{configs.data_hparams_logging["n_bands"]}',
                     f'{configs.data_hparams_logging["lowcut"]:.4f}_{configs.data_hparams_logging["lowcut"]:.4f}',
-                    f'fold{n_fold}'))
+                    f'fold{n_fold}',
+                    f'trial_n{n_trial}'))
 
             train_data = OrderedDict({s: deepcopy(data[s]) for s in fold_splits[i - fold_size: i][:train_size]})
             test_data  = OrderedDict({s: deepcopy(data[s]) for s in fold_splits[i - fold_size: i][-test_size:]})
@@ -85,11 +86,14 @@ class Trainer:
             pred_train, y_train = self.test(data=train_data, model=model_fitted, mean_y=mean_y, std_y=std_y) # results of the fn are already denormalized
 
             for step in range(len(y_test)):
+                if len(y_test[step] != 1): continue
                 writer.add_scalars('test/prediction', {'pred':pred_test[step],
                                                        'true':y_test[step]}, step)
                 writer.add_scalar('test/error', pred_test[step] - y_test[step], step)
+            for step in range(len(y_train)):
+                if len(y_train[step] != 1): continue
                 writer.add_scalars('train/prediction', {'pred':pred_train[step],
-                                                       'true':y_train[step]}, step)
+                                                        'true':y_train[step]}, step)
                 writer.add_scalar('train/error', pred_train[step] - y_train[step], step)
 
             result_test  = Metrics.get_metric(y_pred=pred_test,  y_true=y_test,  metric=configs.metric)
