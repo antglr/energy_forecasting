@@ -86,12 +86,12 @@ class Trainer:
             pred_train, y_train = self.test(data=train_data, model=model_fitted, mean_y=mean_y, std_y=std_y) # results of the fn are already denormalized
 
             for step in range(len(y_test)):
-                if len(y_test[step] != 1): continue
+                if len(y_test[step]) != 1: continue
                 writer.add_scalars('test/prediction', {'pred':pred_test[step],
                                                        'true':y_test[step]}, step)
                 writer.add_scalar('test/error', pred_test[step] - y_test[step], step)
             for step in range(len(y_train)):
-                if len(y_train[step] != 1): continue
+                if len(y_train[step]) != 1: continue
                 writer.add_scalars('train/prediction', {'pred':pred_train[step],
                                                         'true':y_train[step]}, step)
                 writer.add_scalar('train/error', pred_train[step] - y_train[step], step)

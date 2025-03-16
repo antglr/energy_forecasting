@@ -66,7 +66,7 @@ for data_hparams in ParameterGrid(configs.data_search_space):
             for model_name in configs.models_search_space.keys():
                 if data_hparams['past_history'] == 0 and model_name in ['RNN', 'LSTM', 'GRU', 'CNN']:
                     continue
-                if model_name not in ['LinearRegression', 'MLPRegressor']:
+                if model_name not in ['MLPRegressor']:
                     continue
 
                 configs.data_hparams_logging = {
