@@ -48,7 +48,7 @@ class HyperparameterOptimizer:
             model_config['input_size'] = configs.data_hparams_logging['input_size']
         model = model_class(**model_config)
         
-        _, mean_test_result = self.trainer.time_cross_validation(model=model, data=self.data, model_config=model_config)
+        _, mean_test_result = self.trainer.time_cross_validation(model=model, data=self.data, model_config=model_config, n_trial=trial.number)
 
         return mean_test_result
     
