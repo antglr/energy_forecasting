@@ -62,7 +62,7 @@ class Trainer:
                     f'include_present_{configs.data_hparams_logging["include_present"]}',
                     f'PH_{configs.data_hparams_logging["past_history"]}__FH_{configs.data_hparams_logging["forecast_horizon"]}',
                     f'n_bands_{configs.data_hparams_logging["n_bands"]}',
-                    f'{configs.data_hparams_logging["lowcut"]:.4f}_{configs.data_hparams_logging["lowcut"]:.4f}',
+                    f'{configs.data_hparams_logging["lowcut"]:.4f}_{configs.data_hparams_logging["highcut"]:.4f}',
                     f'fold{n_fold}',
                     f'trial_n{n_trial}'))
 
