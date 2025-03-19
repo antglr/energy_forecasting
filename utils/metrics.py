@@ -1,7 +1,8 @@
 import numpy as np
 from sklearn.metrics import (
     mean_absolute_error, 
-    mean_squared_error
+    mean_squared_error,
+    r2_score
 )
 from typing import Union
 
@@ -12,6 +13,10 @@ class Metrics:
     @staticmethod
     def mean_squared_error(y_pred: np.ndarray, y_true: np.ndarray) -> float:
         return mean_squared_error(y_true=y_true, y_pred=y_pred)
+    
+    @staticmethod
+    def r2_score(y_pred: np.ndarray, y_true: np.ndarray) -> float:
+        return r2_score(y_true=y_true, y_pred=y_pred)
 
     @staticmethod           
     def mean_absolute_error(y_pred: np.ndarray, y_true: np.ndarray) -> float:
